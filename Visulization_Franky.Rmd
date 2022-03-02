@@ -1,0 +1,101 @@
+---
+title: "Visulizaiton_Franky"
+author: "Franky Zhang"
+date: "3/1/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(magrittr)
+library(dplyr)
+library(plotrix)
+```
+
+## R Markdown
+
+
+```{r}
+data <- readxl::read_xlsx("dt_EDA_0301.xlsx", col_names  = TRUE)[-1 , ]
+challenges.names <- c()
+for (i in 1:9) {
+  challenges.names[i] <- paste("33", letters[i], sep = "_")
+}
+application.challenges <-  c("shadowing", "crisis counseling", 
+                             "advocacy", "teaching/mentoring", 
+                             "talking with genetic counselors", 
+                             "finding out information", 
+                             "cost", "prerequisite classes", "other")
+challenges <- data %>% dplyr::select(challenges.names)
+GC_related_experience <- data$Q12
+for (i in 1: length(GC_related_experience)) {
+  GC_related_experience[i] <- ifelse(GC_related_experience[i] == "1", 
+                                     "yes", "no")
+}
+```
+
+
+```{r}
+table(GC_related_experience) # 115 have experience while 77 have no experience 
+# which is not an extreme ratio
+challenge.data <- 
+  cbind(GC_related_experience, challenges)[-which(is.na(GC_related_experience)), ] # Q12
+# challenge.data <- cbind(GC_related_experience, challenges)
+rm(challenges, GC_related_experience)
+challenge.data[challenge.data == "NA"] <- 0
+# numerical the data
+challenge.data$`33_a` <- as.numeric(challenge.data$`33_a`)
+challenge.data$`33_b` <- as.numeric(challenge.data$`33_b`)
+challenge.data$`33_c` <- as.numeric(challenge.data$`33_c`)
+challenge.data$`33_d` <- as.numeric(challenge.data$`33_d`)
+challenge.data$`33_e` <- as.numeric(challenge.data$`33_e`)
+challenge.data$`33_f` <- as.numeric(challenge.data$`33_f`)
+challenge.data$`33_g` <- as.numeric(challenge.data$`33_g`)
+challenge.data$`33_h` <- as.numeric(challenge.data$`33_h`)
+challenge.data$`33_i` <- as.numeric(challenge.data$`33_i`)
+
+# separate data
+challenge.data.1 <- challenge.data %>% filter(GC_related_experience == "yes") %>% 
+  select(challenges.names)
+challenge.data.2 <- challenge.data %>% filter(GC_related_experience == "no")  %>% 
+  select(challenges.names)
+compare.expereience <- data.frame(rbind(apply(challenge.data.1, 2, sum), 
+                                        apply(challenge.data.2, 2, sum)))
+rownames(compare.expereience) <- c("with experience", "without experience")
+colnames(compare.expereience) <- application.challenges
+rm(challenge.data.1, challenge.data.2)
+```
+
+
+```{r}
+with_experience <- c()
+without_experience <- c()
+
+for (i in 1:ncol(compare.expereience)) {
+  with_experience[i] <- compare.expereience[1, i]
+  without_experience[i] <- compare.expereience[2, i]
+}
+library(RColorBrewer)
+# with GC-related experience
+myPalette <- brewer.pal(9, "Pastel1")
+slice_labels <- round(with_experience/sum(with_experience)*100, 1)
+slice_labels <- paste(slice_labels, "%", sep = "")
+pie(with_experience, labels = slice_labels, border = "black", 
+      col = myPalette, main = "with GC-related experience")
+legend("topright", application.challenges, cex=0.6, fill=myPalette)
+
+# without GC-related experience
+
+slice_labels <- round(without_experience/sum(without_experience)*100, 1)
+slice_labels <- paste(slice_labels, "%", sep = "")
+pie(without_experience, labels = slice_labels, border = "black", 
+      col = myPalette, main = "without GC-related experience")
+legend("topright", application.challenges, cex=0.6, fill=myPalette)
+```
+
+
+
+
+
+
+
