@@ -106,7 +106,106 @@ legend("topright", application.challenges, cex=0.6, fill=myPalette)
 ```
 
 
-# 
+# the third part of questions
+```{r}
+dt <- data
+oldnames = c("33_a",	"33_b",	"33_c",	"33_d",	"33_e",	"33_f",	"33_g",	"33_h",	"33_i")
+dt <- dt %>% rename_at(vars(oldnames), ~ application.challenges)
+dt <- dt[,c(10:17,19,21,26,27)]
+
+# dt$`Shadowing` <- factor(dt$`Shadowing`)
+# dt$`crisis counseling` <- factor(dt$`crisis counseling`)
+# dt$`advocacy` <- factor(dt$`advocacy`)
+# dt$`teaching/mentoring` <- factor(dt$`teaching/mentoring`)
+# dt$`talking with genetic counselors` <- factor(`dt$talking with genetic counselors`)
+# dt$`finding out information` <- factor(dt$`finding out information`)
+# dt$`cost` <- factor(dt$`cost`)
+# dt$age  <- factor(dt$age)
+# dt$race  <- factor(dt$race)
+# dt$first  <- factor(dt$first)
+# dt <- na.omit(dt)
+
+dt_race <- melt(dt[,-c(9,11,12)],id.vars=c("race"))
+
+dt_race$value <- as.numeric(dt_race$value)
+dt4EDA_race <- dt_race%>% 
+  group_by(race, variable) %>%
+  summarise(true=sum(value),count = n())%>%
+  mutate(value = round(true / sum(count),2)) %>%na.omit()
+
+ggplot(dt4EDA_race, aes(fill = variable, y = value, x = race)) + 
+    geom_bar(position="stack", stat="identity") + # or position="fill"
+    #scale_fill_viridis(discrete = T) +
+    scale_fill_brewer(palette = "Set3") +
+    ggtitle("Different Chanllenges ~ Different Races") +
+    theme_minimal()+
+    xlab("")
+# ggsave("race_challenge.png")
+
+dt%>% 
+  group_by(race) %>%
+  summarise(count = n())%>%
+  ggplot(aes(x="", y=count, fill=race))+
+  geom_bar(width = 1, stat = "identity")+
+  scale_fill_brewer(palette = "Pastel2") +
+  theme_minimal()+
+  coord_polar("y", start=0)+
+  geom_label_repel(aes(label = count))
+# ggsave("race.png")
+
+
+dt_age <- melt(dt[,-c(10,11,12)],id.vars=c("age"))
+
+dt_age$value <- as.numeric(dt_age$value)
+dt4EDA_age <- dt_age%>% 
+  group_by(age, variable) %>%
+  summarise(true=sum(value),count = n())%>%
+  mutate(value = round(true / sum(count),2)) %>%na.omit()
+
+ggplot(dt4EDA_age, aes(fill = variable, y = value, x = age)) + 
+    geom_bar(position="stack", stat="identity") + # or position="fill"
+    #scale_fill_viridis(discrete = T) +
+    scale_fill_brewer(palette = "Set3") +
+    ggtitle("Different Chanllenges ~ Different Ages") +
+    theme_minimal()+
+    xlab("")
+
+dt%>% 
+  group_by(age) %>%
+  summarise(count = n())%>%
+  ggplot(aes(x="", y=count, fill=age))+
+  geom_bar(width = 1, stat = "identity")+
+  scale_fill_brewer(palette = "Pastel2") +
+  theme_minimal()+
+  coord_polar("y", start=0)+
+  geom_label_repel(aes(label = count))
+
+dt_first <- melt(dt[,-c(9,10,12)],id.vars=c("first"))
+dt_first$value <- as.numeric(dt_first$value)
+dt4EDA_first <- dt_first%>% 
+  group_by(first, variable) %>%
+  summarise(true=sum(value),count = n())%>%
+  mutate(value = round(true / sum(count),2)) %>%na.omit()
+
+ggplot(dt4EDA_first, aes(fill = variable, y = value, x = first)) + 
+    geom_bar(position="stack", stat="identity") + # or position="fill"
+    #scale_fill_viridis(discrete = T) +
+    scale_fill_brewer(palette = "Set3") +
+    ggtitle("Different Chanllenges ~ 1st generation college student") +
+    theme_minimal()+
+    xlab("")
+
+dt%>% 
+  group_by(first) %>%
+  summarise(count = n())%>%
+  ggplot(aes(x="", y=count, fill=first))+
+  geom_bar(width = 1, stat = "identity")+
+  scale_fill_brewer(palette = "Pastel2") +
+  theme_minimal()+
+  coord_polar("y", start=0)+
+  geom_label_repel(aes(label = count))
+
+```
 
 
 
