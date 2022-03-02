@@ -6,10 +6,8 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-library(magrittr)
-library(dplyr)
-library(plotrix)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.width=6)#, fig.height= 4, fig.width=8
+pacman::p_load("magrittr","dplyr","plotrix", "tidyverse","ggplot2","gridExtra","viridis","hrbrthemes","reshape2","ggrepel")
 ```
 
 ## R Markdown
@@ -17,6 +15,11 @@ library(plotrix)
 
 ```{r}
 data <- readxl::read_xlsx("dt_EDA_0301.xlsx", col_names  = TRUE)[-1 , ]
+data$race <- str_replace_all(data$race, c("1" = "African American", "2" = "Asian/Pacific Islander", "3" = "Caucasian/White", "4" = "Hispanic/Latinx", "5" = "Native American/Alaskan Native", "6" = "Multi-Racial", "7" = "Other"))
+data$age <- str_replace_all(data$age, c("1" = "A", "2" = "B", "3" = "C", "4" = "D"))
+data$age <- str_replace_all(data$age, c("A" = "18-24", "B" = "25-31", "C" = "32-38", "D" = "39+"))
+
+
 challenges.names <- c()
 for (i in 1:9) {
   challenges.names[i] <- paste("33", letters[i], sep = "_")
@@ -94,8 +97,7 @@ legend("topright", application.challenges, cex=0.6, fill=myPalette)
 ```
 
 
-
-
+# 
 
 
 
