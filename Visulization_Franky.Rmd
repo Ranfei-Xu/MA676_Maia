@@ -130,7 +130,7 @@ dt_race$value <- as.numeric(dt_race$value)
 dt4EDA_race <- dt_race%>% 
   group_by(race, variable) %>%
   summarise(true=sum(value),count = n())%>%
-  mutate(value = round(true / sum(count),2)) %>%na.omit()
+  mutate(value = round(true /count,2)) %>%na.omit()
 
 ggplot(dt4EDA_race, aes(fill = variable, y = value, x = race)) + 
     geom_bar(position="stack", stat="identity") + # or position="fill"
@@ -160,7 +160,7 @@ dt_age$value <- as.numeric(dt_age$value)
 dt4EDA_age <- dt_age%>% 
   group_by(age, variable) %>%
   summarise(true=sum(value),count = n())%>%
-  mutate(value = round(true / sum(count),2)) %>%na.omit()
+  mutate(value = round(true /count,2)) %>%na.omit()
 
 ggplot(dt4EDA_age, aes(fill = variable, y = value, x = age)) + 
     geom_bar(position="stack", stat="identity") + # or position="fill"
@@ -190,7 +190,7 @@ dt_first$first <- as.factor(dt_first$first)
 dt4EDA_first <- dt_first%>% 
   group_by(first, variable) %>%
   summarise(true=sum(value),count = n())%>%
-  mutate(value = round(true / sum(count),2)) %>%na.omit()
+  mutate(value = round(true / count,2)) %>%na.omit()
 
 
 ggplot(dt4EDA_first, aes(fill = variable, y = value, x = first)) + 
