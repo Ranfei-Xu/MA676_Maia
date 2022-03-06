@@ -1,13 +1,13 @@
 ---
-title: "Visulizaiton_Franky"
-author: "Franky Zhang"
-date: "3/1/2022"
+title: "Visulizaiton"
+author: "Franky Zhang, Ranfei Xu, Biyao Zhang"
+date: "`r Sys.Date()`"
 output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.width=6)#, fig.height= 4, fig.width=8
-pacman::p_load("magrittr","dplyr","plotrix", "tidyverse","ggplot2","gridExtra","viridis","hrbrthemes","reshape2","ggrepel")
+pacman::p_load("magrittr","dplyr","plotrix","tidyverse","ggplot2","gridExtra","viridis","hrbrthemes","reshape2","ggrepel")
 ```
 
 # data cleaning
@@ -105,116 +105,122 @@ pie(without_experience, labels = slice_labels, border = "black",
 legend("topright", application.challenges, cex=0.6, fill=myPalette)
 ```
 
+# demo ~ challenges
 
-# the third part of questions
 ```{r}
 dt <- data
 oldnames = c("33_a",	"33_b",	"33_c",	"33_d",	"33_e",	"33_f",	"33_g",	"33_h",	"33_i")
 dt <- dt %>% rename_at(vars(oldnames), ~ application.challenges)
-dt <- dt[,c(10:17,19,21,26,27)]
-dt <- na.omit(dt)
-# dt$`Shadowing` <- factor(dt$`Shadowing`)
-# dt$`crisis counseling` <- factor(dt$`crisis counseling`)
-# dt$`advocacy` <- factor(dt$`advocacy`)
-# dt$`teaching/mentoring` <- factor(dt$`teaching/mentoring`)
-# dt$`talking with genetic counselors` <- factor(`dt$talking with genetic counselors`)
-# dt$`finding out information` <- factor(dt$`finding out information`)
-# dt$`cost` <- factor(dt$`cost`)
-# dt$age  <- factor(dt$age)
-# dt$race  <- factor(dt$race)
-# dt$first  <- factor(dt$first)
+dt <- dt[,c(10:17,19,21,26,27)] # 217 obs.
+dt <- na.omit(dt) # 179 obs.
+```
 
-dt_race <- melt(dt[,-c(9,11,12)],id.vars=c("race"))
+# race ~ challenges
 
+```{r}
+# prepare data
+dt_race <- melt(dt[,-c(9,11,12)],id.vars=c("race"))%>%na.omit()
 dt_race$value <- as.numeric(dt_race$value)
 dt4EDA_race <- dt_race%>% 
-  group_by(race, variable) %>%
-  summarise(true=sum(value),count = n())%>%
-  mutate(value = round(true /count,2)) %>%na.omit()
+  group_by(race, variable) %>%  summarise(true=sum(value),count = n())%>%
+  mutate(value = round(true /count,2)) 
 
+# plot
 ggplot(dt4EDA_race, aes(fill = variable, y = value, x = race)) + 
-    geom_bar(position="stack", stat="identity") + # or position="fill"
-    #scale_fill_viridis(discrete = T) +
+    geom_bar(position="stack", stat="identity")+
     scale_fill_brewer(palette = "Set3") +
-    ggtitle("Different Chanllenges ~ Different Races") +
-    theme_minimal()+
-    xlab("")
+    ggtitle("Race ~ Chanllenges") +
+    xlab("Race")+
+    ylab("The Average # Challenges")+
+    scale_fill_discrete(name = "Challenges")+
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+    theme_minimal()
 ggsave("race_challenge.png")
-
-dt%>% 
+dt_race%>% 
   group_by(race) %>%
   summarise(count = n())%>%
-  ggplot(aes(x="", y=count, fill=race))+
+  ggplot(aes(x="Race", y=count, fill=race))+
   geom_bar(width = 1, stat = "identity")+
   scale_fill_brewer(palette = "Pastel2") +
-  theme_minimal()+
-  coord_polar("y", start=0)+
-  geom_label_repel(aes(label = count))
+  coord_polar("y", start=0) +
+  geom_label_repel(aes(label = paste0(round(count/nrow(dt_race),2), "%")),
+                   size = 4.5,  show.legend = FALSE) +
+  guides(fill = guide_legend(title = "Group")) +
+  theme_void() #  theme_minimal()
 ggsave("race.png")
+```
 
+# age ~ challenges
 
-dt_age <- melt(dt[,-c(10,11,12)],id.vars=c("age"))
-
-
+```{R}
+# prepare data
+dt_age <- melt(dt[,-c(10,11,12)],id.vars=c("age")) %>% na.omit()
 dt_age$value <- as.numeric(dt_age$value)
 dt4EDA_age <- dt_age%>% 
   group_by(age, variable) %>%
-  summarise(true=sum(value),count = n())%>%
-  mutate(value = round(true /count,2)) %>%na.omit()
-
+  summarise(true=sum(value),count = n())%>% 
+  # `summarise()` has grouped output by 'age'. You can override using the `.groups` argument. ???
+  mutate(value = round(true /count,2)) 
+# plot
 ggplot(dt4EDA_age, aes(fill = variable, y = value, x = age)) + 
-    geom_bar(position="stack", stat="identity") + # or position="fill"
-    #scale_fill_viridis(discrete = T) +
+    geom_bar(position="stack", stat="identity")+
     scale_fill_brewer(palette = "Set3") +
-    # ggtitle("Different Chanllenges ~ Different Ages") +
-    theme_minimal()+
-    xlab("")+
-    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+    ggtitle("Age ~ Challenges") +
+    xlab("Age")+
+    ylab("The Average # Challenges")+
+    scale_fill_discrete(name = "Challenges")+
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))+
+    theme_minimal()
+    
 ggsave("age_challenge.png")
-dt%>% 
+dt_age%>% 
   group_by(age) %>%
   summarise(count = n())%>%
-  ggplot(aes(x="", y=count, fill=age))+
+  ggplot(aes(x="Age", y=count, fill=age))+
   geom_bar(width = 1, stat = "identity")+
   scale_fill_brewer(palette = "Pastel2") +
-  theme_minimal()+
-  coord_polar("y", start=0)+
-  geom_label_repel(aes(label = count))
+  coord_polar("y", start=0) +
+  geom_label_repel(aes(label = paste0(round(count/nrow(dt_age),2), "%")),
+                   size = 4.5,  show.legend = FALSE) +
+  guides(fill = guide_legend(title = "Group")) +
+  theme_void() #  theme_minimal()
+  
 ggsave("age.png")
+```
 
-
+# first generation ~ challenge
+```{R}
+# prepare data
 dt_first <- melt(dt[,-c(9,10,12)],id.vars=c("first"))
-
 dt_first$value <- as.numeric(dt_first$value)
 dt_first$first <- as.factor(dt_first$first)
 dt4EDA_first <- dt_first%>% 
   group_by(first, variable) %>%
   summarise(true=sum(value),count = n())%>%
-  mutate(value = round(true / count,2)) %>%na.omit()
+  mutate(value = round(true / count,2))
 
-
+# plot
 ggplot(dt4EDA_first, aes(fill = variable, y = value, x = first)) + 
-    geom_bar(position="stack", stat="identity") + # or position="fill"
-    #scale_fill_viridis(discrete = T) +
+    geom_bar(position="stack", stat="identity")+
     scale_fill_brewer(palette = "Set3") +
-    #ggtitle("Different Chanllenges ~ 1st generation college student") +
-    theme_minimal()+
-    xlab("")+
-    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+    ggtitle("1st Generation ~ Challenges") +
+    xlab("1st Generation")+
+    ylab("The Average # Challenges")+
+    scale_fill_discrete(name = "Challenges")+
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))+
+    theme_minimal()
 ggsave("first_challenge.png")
 
-dt%>% 
+dt_first%>% 
   group_by(first) %>%
   summarise(count = n())%>%
-  ggplot(aes(x="", y=count, fill=first))+
+  ggplot(aes(x="1st generation", y=count, fill=first))+
   geom_bar(width = 1, stat = "identity")+
   scale_fill_brewer(palette = "Pastel2") +
-  theme_minimal()+
-  coord_polar("y", start=0)+
-  geom_label_repel(aes(label = count))
+  coord_polar("y", start=0) +
+  geom_label_repel(aes(label = paste0(round(count/nrow(dt_first),2), "%")),
+                   size = 4.5,  show.legend = FALSE) +
+  guides(fill = guide_legend(title = "Group")) +
+  theme_void() #  theme_minimal()
 ggsave("first.png")
-
 ```
-
-
-
