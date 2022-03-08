@@ -7,7 +7,7 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.width=6)#, fig.height= 4, fig.width=8
-pacman::p_load("magrittr","dplyr","plotrix","tidyverse","ggplot2","gridExtra","viridis","hrbrthemes","reshape2","ggrepel")
+pacman::p_load("magrittr","dplyr","plotrix","tidyverse","ggplot2","gridExtra","viridis","hrbrthemes","reshape2","ggrepel","grid")
 ```
 
 # data cleaning
@@ -44,6 +44,69 @@ for (i in 1: length(GC_related_experience)) {
                                      "yes", "no")
 }
 
+
+```
+
+
+
+# demo ~ application
+
+```{r}
+
+#Schhols,gap years~application !!!
+data1<-select(data,Q7,Q8,age)
+#A<-filter(data1,Q35=="A")
+data1$Q7 <- as.numeric(data1$Q7)
+data1$Q8 <- as.numeric(data1$Q8)
+# which(is.na(data1$Q8))
+data1 <- data1[-which(data1$age == "NA"), ]
+data1 <- data1[-which(is.na(data1$Q8)), ]
+data1 %>% group_by(age) %>%
+  summarise(freq_Q8 = mean(Q8), freq_Q7 = mean(Q7))
+# create a dataset
+age <- c(rep("18-24" , 2) , rep("25-31" , 2) , rep("32-38" , 2) , rep("39+" , 2) )
+condition <- rep(c("Schools" , "Gap Years") , 4)
+value <- c(4.71,3.16,1.59,1,1.17,0.5,0.176,18)
+d <- data.frame(age,condition,value)
+# Grouped
+ggplot(d, aes(fill=condition, y=value, x=age)) + 
+  geom_bar(position="dodge", stat="identity",aes())+theme_ipsum()
+
+#Racw~application Q37 !!!
+data2<-select(data,Q7,Q8,race)
+data2$Q7 <- as.numeric(data2$Q7)
+data2$Q8 <- as.numeric(data2$Q8)
+data2 <- data2[-which(is.na(data2$Q8)), ]
+data2 <- data2[-which(data2$race == "NA"), ]
+data2 %>% group_by(race) %>%
+    summarise(freq_Q8 = mean(Q8), freq_Q7 = mean(Q7))
+data2$race<-str_replace_all(data2$race,c("1"="African American","2"="Asian/Pacific","3"="Caucaisian/White","4"="Hispanic/Latinx","5"="Native American/Alaskan Native","6"="Multi-racial","7"="Other"))
+
+race <- c(rep("African American" , 2) , rep("Asian/Pacific" , 2) , rep("Caucaisian/White" , 2),rep("Hispanic/Latinx" , 2),rep("Native American/Alaskan Native" , 2),rep("Multi-racial" , 2),rep("Other", 2))
+condition <- rep(c("Schools" , "Gap Years") , 7)
+value <- c(6.2,5.36,3.62,2.43,6,2,2.5,1.8,1.79,0.802,1.14,1.42,1,0.5)
+d <- data.frame(race,condition,value)
+# Grouped
+ggplot(d, aes(fill=condition, y=value, x=race)) + 
+  geom_bar(position="dodge", stat="identity",aes())+theme_ipsum()
+
+# First generation~Application Q39
+data3<-select(data,Q7,Q8,first)
+data3$Q7 <- as.numeric(data3$Q7)
+data3$Q8 <- as.numeric(data3$Q8)
+data3<- data3[-which(is.na(data3$Q8)), ]
+data3<- data3[-which(data3$first == "NA"), ]
+data3 %>% group_by(first) %>%
+  summarise(freq_Q8 = mean(Q8), freq_Q7 = mean(Q7))
+data3$first<-str_replace_all(data3$first,c("0"="Yes","1"="No"))
+
+Generation <- c(rep("First Generation" , 2) , rep("Not First Generation" , 2))
+condition <- rep(c("Schools" , "Gap Years") , 2)
+value <- c(4.48,2.75,1.08,0.720)
+d <- data.frame(Generation,condition,value)
+# Grouped
+ggplot(d, aes(fill=condition, y=value, x=Generation)) + 
+  geom_bar(position="dodge", stat="identity",aes())+theme_ipsum()
 
 ```
 
@@ -115,7 +178,7 @@ dt <- dt[,c(10:17,19,21,26,27)] # 217 obs.
 dt <- na.omit(dt) # 179 obs.
 ```
 
-# race ~ challenges
+### race ~ challenges
 
 ```{r}
 # prepare data
@@ -150,7 +213,7 @@ dt_race%>%
 ggsave("race.png")
 ```
 
-# age ~ challenges
+### age ~ challenges
 
 ```{R}
 # prepare data
@@ -188,7 +251,7 @@ dt_age%>%
 ggsave("age.png")
 ```
 
-# first generation ~ challenge
+### first generation ~ challenge
 ```{R}
 # prepare data
 dt_first <- melt(dt[,-c(9,10,12)],id.vars=c("first"))
